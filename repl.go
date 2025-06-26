@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"bufio"
 	"os"
+	"github.com/PavelVaavra/pokedexcli/internal/pokeapi"
 )
 
 func cleanInput(text string) []string {
@@ -22,6 +23,11 @@ func getCommands() map[string]cliCommand {
 			name:        "exit",
 			description: "Exit the Pokedex",
 			callback:    commandExit,
+		},
+		"map": {
+			name:        "map",
+			description: "Displays the names of 20 location areas",
+			callback:    pokeapi.CommandMap,
 		},
 	}
 }
