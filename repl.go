@@ -32,13 +32,13 @@ func getCommands() map[string]cliCommand {
 	}
 }
 
-func commandExit() error {
+func commandExit(urls *pokeapi.Urls) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp() error {
+func commandHelp(urls *pokeapi.Urls) error {
 	fmt.Print(`Welcome to the Pokedex!
 Usage:
 
@@ -52,11 +52,15 @@ Usage:
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(urls *pokeapi.Urls) error
 }
 
 func replMgr() {
 	commands := getCommands()
+	urls := &pokeapi.Urls{
+		Next: "https://pokeapi.co/api/v2/location-area/",
+		Previous: "",
+	}
 	scanner := bufio.NewScanner(os.Stdin)
 	for true {
 		fmt.Print("Pokedex > ")
@@ -65,7 +69,7 @@ func replMgr() {
 			if len(commandName) == 1 {
 				command, ok := commands[commandName[0]]
 				if ok {
-					err := command.callback()
+					err := command.callback(urls)
 					if err != nil {
 						fmt.Println(err)
 					}
