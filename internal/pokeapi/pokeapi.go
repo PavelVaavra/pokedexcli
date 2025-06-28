@@ -22,29 +22,50 @@ type LocationArea struct {
 }
 
 func CommandMap(urls *Urls) error {
-	res, err := http.Get(urls.Next)
+	next, previous, err := getLocationArea(urls.Next)
+	urls.Next, urls.Previous = next, previous
+
+	return err
+}
+
+func CommandMapb(urls *Urls) error {
+	if urls.Previous == "" {
+		fmt.Println("You're on the first page")
+		return nil
+	}
+	next, previous, err := getLocationArea(urls.Previous)
+	urls.Next, urls.Previous = next, previous
+
+	return err
+}
+
+func getLocationArea(url string) (next, previous string, err error) {
+	res, err := http.Get(url)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode > 299 {
+		return "", "", fmt.Errorf("Response failed with status code: %d", res.StatusCode)
+	}
 
 	var locationArea LocationArea
 	decoder := json.NewDecoder(res.Body)
 	err = decoder.Decode(&locationArea)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
-	var locations []string
-	for _, location := range locationArea.Results {
-		locations = append(locations, location.Name)
+	var names []string
+	for _, results := range locationArea.Results {
+		names = append(names, results.Name)
 	}
 
-	for _, location := range locations {
-		fmt.Println(location)
+	for _, name := range names {
+		fmt.Println(name)
 	}
-	
-	urls.Next, urls.Previous = locationArea.Next, locationArea.Previous
+	fmt.Println()
 
-	return nil
-}
+	return locationArea.Next, locationArea.Previous, nil
+} 

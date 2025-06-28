@@ -14,6 +14,16 @@ func cleanInput(text string) []string {
 
 func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
+		"map": {
+			name:        "map",
+			description: "Displays the names of next 20 location areas",
+			callback:    pokeapi.CommandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays the names of previous 20 location areas",
+			callback:    pokeapi.CommandMapb,
+		},
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
@@ -23,11 +33,6 @@ func getCommands() map[string]cliCommand {
 			name:        "exit",
 			description: "Exit the Pokedex",
 			callback:    commandExit,
-		},
-		"map": {
-			name:        "map",
-			description: "Displays the names of 20 location areas",
-			callback:    pokeapi.CommandMap,
 		},
 	}
 }
