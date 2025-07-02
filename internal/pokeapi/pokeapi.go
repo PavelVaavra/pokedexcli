@@ -4,7 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"encoding/json"
+	"time"
+	"io"
+	"github.com/PavelVaavra/pokedexcli/internal/pokecache"
 )
+
+var cache = pokecache.NewCache(time.Duration(5) * time.Second)
 
 type Urls struct {
 	Next string
@@ -50,9 +55,23 @@ func getLocationArea(url string) (next, previous string, err error) {
 		return "", "", fmt.Errorf("Response failed with status code: %d", res.StatusCode)
 	}
 
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return "", "", err
+	}
+
+	cache.Add(url, body)
+	bytes, _ := cache.Get(url)
+	fmt.Print(string(bytes))
+
 	var locationArea LocationArea
-	decoder := json.NewDecoder(res.Body)
-	err = decoder.Decode(&locationArea)
+	// decoder := json.NewDecoder(res.Body)
+	// err = decoder.Decode(&locationArea)
+	// if err != nil {
+	// 	return "", "", err
+	// }
+
+	err = json.Unmarshal(bytes, &locationArea)
 	if err != nil {
 		return "", "", err
 	}
