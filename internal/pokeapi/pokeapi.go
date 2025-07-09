@@ -9,7 +9,7 @@ import (
 	"github.com/PavelVaavra/pokedexcli/internal/pokecache"
 )
 
-var cache = pokecache.NewCache(time.Duration(5) * time.Second)
+var cache = pokecache.NewCache(time.Duration(20) * time.Second)
 
 type Urls struct {
 	Next string
@@ -45,31 +45,26 @@ func CommandMapb(urls *Urls) error {
 }
 
 func getLocationArea(url string) (next, previous string, err error) {
-	res, err := http.Get(url)
-	if err != nil {
-		return "", "", err
-	}
-	defer res.Body.Close()
+	bytes, ok := cache.Get(url)
+	if !ok {
+		res, err := http.Get(url)
+		if err != nil {
+			return "", "", err
+		}
+		defer res.Body.Close()
 
-	if res.StatusCode > 299 {
-		return "", "", fmt.Errorf("Response failed with status code: %d", res.StatusCode)
-	}
+		if res.StatusCode > 299 {
+			return "", "", fmt.Errorf("Response failed with status code: %d", res.StatusCode)
+		}
 
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return "", "", err
+		bytes, err = io.ReadAll(res.Body)
+		if err != nil {
+			return "", "", err
+		}
+		cache.Add(url, bytes)
 	}
-
-	cache.Add(url, body)
-	bytes, _ := cache.Get(url)
-	fmt.Print(string(bytes))
 
 	var locationArea LocationArea
-	// decoder := json.NewDecoder(res.Body)
-	// err = decoder.Decode(&locationArea)
-	// if err != nil {
-	// 	return "", "", err
-	// }
 
 	err = json.Unmarshal(bytes, &locationArea)
 	if err != nil {
@@ -81,10 +76,11 @@ func getLocationArea(url string) (next, previous string, err error) {
 		names = append(names, results.Name)
 	}
 
-	for _, name := range names {
-		fmt.Println(name)
+	for i, name := range names {
+		if i == 0 || i == 1 {
+			fmt.Println(name)
+		}
 	}
-	fmt.Println()
 
 	return locationArea.Next, locationArea.Previous, nil
 } 

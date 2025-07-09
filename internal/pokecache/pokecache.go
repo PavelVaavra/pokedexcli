@@ -51,10 +51,15 @@ func (cache *Cache) reapLoop(duration time.Duration) {
 	ticker := time.NewTicker(duration)
 	for {
 		<-ticker.C
+		hNow, mNow, sNow := time.Now().Clock()
+		fmt.Printf("reapLoop at time: %v:%v:%v\n", hNow, mNow, sNow)
+		fmt.Print("Pokedex > ")
 		cache.Mux.Lock()
 		for key, value := range cache.Entries {
 			if time.Since(value.createdAt) > duration {
-				fmt.Println("Deleting: ", key)
+				hCreatedAt, mCreatedAt, sCreatedAt := value.createdAt.Clock()
+				fmt.Printf("Deleting: %v, Created at: %v:%v:%v\n", key, hCreatedAt, mCreatedAt, sCreatedAt)
+				fmt.Print("Pokedex > ")
 				delete(cache.Entries, key)
 			}
 		}
