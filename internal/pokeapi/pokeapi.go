@@ -14,6 +14,10 @@ var cache = pokecache.NewCache(time.Duration(20) * time.Second)
 type Urls struct {
 	Next string
 	Previous string
+	ExploreBasis string
+	CatchBasis string
+	ExploreArea string
+	CatchPokemon string
 }
 	
 type LocationArea struct {
@@ -27,9 +31,16 @@ type LocationArea struct {
 }
 
 func CommandMap(urls *Urls) error {
-	next, previous, err := getLocationArea(urls.Next)
-	urls.Next, urls.Previous = next, previous
+	url := urls.Next
 
+	bytes, err := getBytes(url)
+	if err != nil {
+		return err
+	}
+
+	next, previous, err := parseLocationArea(bytes)
+	
+	urls.Next, urls.Previous = next, previous
 	return err
 }
 
@@ -38,32 +49,21 @@ func CommandMapb(urls *Urls) error {
 		fmt.Println("You're on the first page")
 		return nil
 	}
-	next, previous, err := getLocationArea(urls.Previous)
-	urls.Next, urls.Previous = next, previous
 
+	url := urls.Previous
+
+	bytes, err := getBytes(url)
+	if err != nil {
+		return err
+	}
+
+	next, previous, err := parseLocationArea(bytes)
+	
+	urls.Next, urls.Previous = next, previous
 	return err
 }
 
-func getLocationArea(url string) (next, previous string, err error) {
-	bytes, ok := cache.Get(url)
-	if !ok {
-		res, err := http.Get(url)
-		if err != nil {
-			return "", "", err
-		}
-		defer res.Body.Close()
-
-		if res.StatusCode > 299 {
-			return "", "", fmt.Errorf("Response failed with status code: %d", res.StatusCode)
-		}
-
-		bytes, err = io.ReadAll(res.Body)
-		if err != nil {
-			return "", "", err
-		}
-		cache.Add(url, bytes)
-	}
-
+func parseLocationArea(bytes []byte) (next, previous string, err error) {
 	var locationArea LocationArea
 
 	err = json.Unmarshal(bytes, &locationArea)
@@ -83,4 +83,27 @@ func getLocationArea(url string) (next, previous string, err error) {
 	}
 
 	return locationArea.Next, locationArea.Previous, nil
-} 
+}
+
+func getBytes(url string) (bytes []byte, err error) {
+	bytes, ok := cache.Get(url)
+	if !ok {
+		res, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode > 299 {
+			return nil, fmt.Errorf("Response failed with status code: %d", res.StatusCode)
+		}
+
+		bytes, err = io.ReadAll(res.Body)
+		if err != nil {
+			return nil, err
+		}
+		cache.Add(url, bytes)
+	}
+	
+	return bytes, nil
+}

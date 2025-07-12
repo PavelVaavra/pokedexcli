@@ -65,15 +65,20 @@ func replMgr() {
 	urls := &pokeapi.Urls{
 		Next: "https://pokeapi.co/api/v2/location-area/",
 		Previous: "",
+		ExploreBasis: "https://pokeapi.co/api/v2/location-area/",
+		ExploreArea: "",
+		CatchBasis: "https://pokeapi.co/api/v2/pokemon/",
+		CatchPokemon: "",
 	}
 	scanner := bufio.NewScanner(os.Stdin)
 	for true {
 		fmt.Print("Pokedex > ")
 		if scanner.Scan() {
 			commandName := cleanInput(scanner.Text())
-			if len(commandName) == 1 {
+			if len(commandName) == 1 || len(commandName) == 2 {
 				command, ok := commands[commandName[0]]
 				if ok {
+					// if command 
 					err := command.callback(urls)
 					if err != nil {
 						fmt.Println(err)
