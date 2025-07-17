@@ -34,6 +34,11 @@ func getCommands() map[string]cliCommand {
 			description: "Tries to catch a pokemon",
 			callback:    pokeapi.CommandCatch,
 		},
+		"inspect": {
+			name:        "inspect",
+			description: "Inspects a caught pokemon",
+			callback:    pokeapi.CommandInspect,
+		},
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
@@ -79,6 +84,7 @@ func replMgr() {
 		ExploreArea: "",
 		CatchBasis: "https://pokeapi.co/api/v2/pokemon/",
 		CatchPokemon: "",
+		InspectPokemon: "",
 	}
 	scanner := bufio.NewScanner(os.Stdin)
 	for true {
@@ -93,6 +99,9 @@ func replMgr() {
 					}
 					if command.name == "catch" {
 						urls.CatchPokemon = commandName[1]
+					}
+					if command.name == "inspect" {
+						urls.InspectPokemon = commandName[1]
 					}
 					err := command.callback(urls)
 					if err != nil {

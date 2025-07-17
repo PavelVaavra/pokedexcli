@@ -21,6 +21,7 @@ type Urls struct {
 	CatchBasis string
 	ExploreArea string
 	CatchPokemon string
+	InspectPokemon string
 }
 	
 type LocationArea struct {
@@ -433,6 +434,26 @@ func CommandCatch(urls *Urls) error {
 	return err
 }
 
+func CommandInspect(urls *Urls) error {
+	if pokemon, ok := Pokedex[urls.InspectPokemon]; ok {
+		fmt.Printf("Name: %v\n", pokemon.Name)
+		fmt.Printf("Height: %v\n", pokemon.Height)
+		fmt.Printf("Weight: %v\n", pokemon.Weight)
+		fmt.Println("Stats:")
+		for _, stat := range pokemon.Stats {
+			fmt.Printf("  -%v: %v\n", stat.Stat.Name, stat.BaseStat)
+		}
+		fmt.Println("Types:")
+		for _, Type := range pokemon.Types {
+			fmt.Printf("  -%v\n", Type.Type.Name)
+		}
+   	} else {
+		fmt.Println("you have not caught that pokemon")
+	}
+
+	return nil
+}
+
 func parseCatch(bytes []byte, url string) (err error) {
 	var pokemon Pokemon
 
@@ -452,6 +473,7 @@ func parseCatch(bytes []byte, url string) (err error) {
 	name := pokemon.Name
 	if pokemon.BaseExperience < 0 {
 		fmt.Printf("%v was caught!\n", name)
+		fmt.Println("You may now inspect it with the inspect command.")
 		Pokedex[name] = pokemon
 	} else {
 		fmt.Printf("%v escaped!\n", name)
