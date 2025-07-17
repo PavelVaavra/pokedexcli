@@ -454,6 +454,15 @@ func CommandInspect(urls *Urls) error {
 	return nil
 }
 
+func CommandPokedex(urls *Urls) error {
+	fmt.Println("Your Pokedex:")
+	for key, _ := range Pokedex {
+		fmt.Printf(" - %v\n", key)
+	}
+
+	return nil
+}
+
 func parseCatch(bytes []byte, url string) (err error) {
 	var pokemon Pokemon
 
