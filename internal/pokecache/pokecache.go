@@ -36,6 +36,19 @@ func (cache *Cache) Add(key string, val []byte) {
 	cache.Mux.Unlock()
 }
 
+func (cache *Cache) Modify(key string, val []byte) {
+	cache.Mux.Lock()
+	fmt.Println("Modifying: ", key)
+	// First we get a "copy" of the entry
+	if entry, ok := cache.Entries[key]; ok {
+		// Then we modify the copy
+		entry.val = val
+    	// Then we reassign map entry
+       	cache.Entries[key] = entry
+   	}
+	cache.Mux.Unlock()
+}
+
 func (cache *Cache) Get(key string) (val []byte, exists bool) {
 	cache.Mux.Lock()
 	entry, ok := cache.Entries[key]

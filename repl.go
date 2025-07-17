@@ -24,6 +24,16 @@ func getCommands() map[string]cliCommand {
 			description: "Displays the names of previous 20 location areas",
 			callback:    pokeapi.CommandMapb,
 		},
+		"explore": {
+			name:        "explore",
+			description: "Lists all Pokemons located in the area",
+			callback:    pokeapi.CommandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Tries to catch a pokemon",
+			callback:    pokeapi.CommandCatch,
+		},
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
@@ -78,7 +88,12 @@ func replMgr() {
 			if len(commandName) == 1 || len(commandName) == 2 {
 				command, ok := commands[commandName[0]]
 				if ok {
-					// if command 
+					if command.name == "explore" {
+						urls.ExploreArea = commandName[1]
+					}
+					if command.name == "catch" {
+						urls.CatchPokemon = commandName[1]
+					}
 					err := command.callback(urls)
 					if err != nil {
 						fmt.Println(err)
